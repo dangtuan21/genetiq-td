@@ -1,0 +1,36 @@
+.processer {
+	display: flex;
+	width: 270px;
+	justify-content: space-between;
+	padding: var(--space-4-px-025-rem, 4px) var(--space-8-px-05-rem, 8px)
+		var(--space-4-px-025-rem, 4px) var(--space-10-px-0625-rem, 10px);
+	align-items: center;
+	gap: var(--space-32-px-2-rem, 32px);
+	border-radius: var(--Font-size-S, 14px);
+	background: linear-gradient(
+		90deg,
+		rgba(147, 190, 244, 0.5) 0%,
+		rgba(170, 199, 237, 0.14) 100%
+	);
+
+	.file {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+		overflow: hidden;
+		color: var(--p-color-text, rgba(33, 38, 46, 1));
+		text-overflow: ellipsis;
+
+		/* body/md/regular */
+		font-family: var(--Font-family-body, Inter);
+		font-size: var(--Font-size-S, 14px);
+		font-style: normal;
+		font-weight: 400;
+		line-height: var(--Font-line-height-M, 20px); /* 142.857% */
+	}
+
+	.icon {
+		display: flex;
+		justify-content: center;
+	}
+}

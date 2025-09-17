@@ -1,0 +1,111 @@
+.config-items-wrapper {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	max-width: 800px;
+	max-height: 400px;
+	gap: 20px;
+	padding: 32px;
+	background-color: none;
+	border-radius: 20px;
+	justify-content: center;
+	align-items: center;
+}
+
+.config-container-body {
+	width: 100%;
+	margin-top: 56px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.config-item-card {
+	width: 349px;
+	height: 148px;
+	padding: 20px;
+	background-color: red;
+	border-radius: 16px;
+	border: 1px solid #a5bce6;
+	background: linear-gradient(107deg, #fff 38.37%, #cbd7f4 179.43%);
+}
+
+.item-card-icon-wrapper {
+	display: flex;
+	justify-content: space-between;
+}
+
+.item-card-icon {
+	border-radius: var(--layout-card-S-radius, 8px);
+	background: var(--data-viz-color-3-2, #d3ecff);
+	width: 48px;
+	height: 48px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.item-card-title {
+	color: var(--Neutral-text, #0b101a);
+	font-family: var(--font-family-title, Inter);
+	font-size: var(--font-size-2xl, 20px);
+	font-style: normal;
+	font-weight: var(--font-weight-semibold-600, 600);
+	line-height: var(--font-line-hight-xl, 24px);
+	letter-spacing: -0.4px;
+	padding: 8px 0px;
+}
+
+.item-card-content {
+	color: var(--Neutral-text-weak, #5f6877);
+	font-family: var(--font-family-title, Inter);
+	font-size: var(--font-size-xl, 16px);
+	font-style: normal;
+	font-weight: 500;
+	line-height: var(--font-line-hight-lg, 20px);
+	letter-spacing: -0.16px;
+}
+
+.config-control-bar {
+	width: 95%;
+	position: fixed;
+	background-color: rgba(255, 255, 255, 0.15);
+	height: 50px;
+	border-radius: 40px;
+	bottom: 30px;
+	display: flex;
+	padding: var(--space-8-px-05-rem, 8px) var(--space-10-px-0625-rem, 10px);
+	justify-content: space-between;
+	align-items: center;
+
+	button {
+		display: flex;
+		justify-content: center;
+		gap: 4px;
+	}
+
+	&-skip {
+		padding: var(---Buttons-and-Inputs-lg-py, 12px)
+			var(---Buttons-and-Inputs-lg-px, 16px);
+		gap: var(---Buttons-and-Inputs-gap, 8px);
+		border-radius: var(
+			---Buttons-and-Inputs-button-border-radius-primary,
+			999px
+		);
+		background: var(--Background, #fcfdfd);
+	}
+
+	&-submit {
+		border-radius: var(
+			---Buttons-and-Inputs-button-border-radius-primary,
+			999px
+		);
+		opacity: 0.4;
+		background: #13285f;
+		color: white;
+
+		&:hover {
+			border-color: white;
+		}
+	}
+}

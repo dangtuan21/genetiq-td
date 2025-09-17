@@ -1,0 +1,27 @@
+{
+	"welcome": "Welcome to Genetiq",
+	"dashboard": {
+		"title": "Dashboard",
+		"overview": "Overview",
+		"reports": "Reports",
+		"settings": "Settings",
+		"goals": "Goals",
+		"tests": "Tests"
+	},
+	"auth": {
+		"login": "Login",
+		"register": "Register",
+		"logout": "Logout"
+	},
+	"language": {
+		"en": "English",
+		"es": "Spanish",
+		"fr": "French",
+		"de": "German",
+		"zh": "Chinese"
+	},
+	"theme": {
+		"switchToLight": "Switch to light theme",
+		"switchToDark": "Switch to dark theme"
+	}
+}

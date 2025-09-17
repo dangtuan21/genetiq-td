@@ -1,0 +1,45 @@
+.icon-button {
+	height: 36px;
+	width: 36px;
+	background-color: #ffffff !important;
+	border: 1px solid #5f68771f !important;
+	border-radius: 10px !important;
+	cursor: pointer !important;
+	transition: all 0.2s ease;
+	display: flex;
+
+	svg {
+		width: 22px;
+		height: 22px;
+	}
+
+	&.active {
+		border: none !important;
+		background: linear-gradient(100deg, #3b8df5 0%, #0059db 100%) !important;
+
+		svg path {
+			fill: #ffffff !important;
+		}
+	}
+
+	&.disabled {
+		background: #ffffff !important;
+		cursor: default !important;
+		opacity: 0.6;
+		display: flex;
+		&:hover svg path {
+			fill: #8f95a0 !important;
+		}
+
+		svg path {
+			fill: #8f95a0;
+		}
+		&.active {
+			background: #ffffff !important;
+		}
+	}
+}
+
+.icon-button:hover:not(.disabled) svg path {
+	fill: #0974fb;
+}

@@ -1,0 +1,49 @@
+// Features/NavBar/Components/Navigation/SideBar/SideBar.module.scss
+.SideBar-container {
+	position: absolute;
+	left: 0px;
+	display: flex;
+	gap: 4px;
+	flex-direction: column;
+
+	z-index: 2;
+
+	button {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border-radius: unset;
+		border: unset;
+		padding: unset;
+		font-size: unset;
+		font-weight: unset;
+		background-color: unset;
+		position: relative;
+
+		.SideBar-count {
+			position: absolute;
+			top: -6px;
+			right: -6px;
+			font-family: var(--Font-family-body, Inter);
+			font-size: var(--Font-size-XS, 12px);
+			font-style: normal;
+			font-weight: 600;
+		}
+
+		span {
+			position: relative;
+			min-width: 20px;
+			min-height: 20px;
+			max-width: 20px;
+			max-height: 20px;
+			color: #fff !important;
+			border-radius: 100%;
+			z-index: 100000;
+			background-color: #0974fb;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			top: -2px;
+		}
+	}
+}

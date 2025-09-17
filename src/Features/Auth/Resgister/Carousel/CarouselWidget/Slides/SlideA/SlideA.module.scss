@@ -1,0 +1,51 @@
+.Carousel-login-wrapper {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.Carousel-img-wrapper {
+	width: 512px;
+	text-align: center;
+	img {
+		width: 346px;
+		border-radius: 9.448px;
+		border: 6px solid rgba(255, 255, 255, 0.2);
+		background: radial-gradient(
+				53.95% 72.86% at 50.06% 58.79%,
+				#e6ebf5 0%,
+				rgba(255, 255, 255, 0) 100%
+			),
+			#fff;
+		backdrop-filter: blur(11.5px);
+	}
+}
+.Carousel-login-description {
+	text-align: center;
+	max-width: 400px;
+	h2 {
+		font-family: var(--font-family-title, Inter);
+		font-size: var(--font-size-3xl, 24px);
+		font-style: normal;
+		font-weight: var(--font-weight-semibold-600, 600);
+		line-height: var(--font-line-hight-2xl, 32px); /* 133.333% */
+		letter-spacing: -0.48px;
+		color: #ffff;
+	}
+
+	h4 {
+		overflow: hidden;
+		color: var(--Border-inverted, #fcfdfd);
+		text-align: center;
+		text-overflow: ellipsis;
+
+		/* actions/title/H5 */
+		font-family: var(--font-family-title, Inter);
+		font-size: var(--font-size-lg, 14px);
+		font-style: normal;
+		font-weight: var(--font-weight-light-400, 400);
+		line-height: var(--font-line-hight-lg, 20px); /* 142.857% */
+	}
+}

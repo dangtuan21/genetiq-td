@@ -1,0 +1,41 @@
+.Carousel-login-wrapper {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.Carousel-img-wrapper {
+	width: 512px;
+	img {
+		width: 512px;
+	}
+}
+.Carousel-login-description {
+	text-align: center;
+	max-width: 400px;
+	h2 {
+		font-family: var(--font-family-title, Inter);
+		font-size: var(--font-size-3xl, 24px);
+		font-style: normal;
+		font-weight: var(--font-weight-semibold-600, 600);
+		line-height: var(--font-line-hight-2xl, 32px); /* 133.333% */
+		letter-spacing: -0.48px;
+		color: #ffff;
+	}
+
+	h4 {
+		overflow: hidden;
+		color: var(--Border-inverted, #fcfdfd);
+		text-align: center;
+		text-overflow: ellipsis;
+
+		/* actions/title/H5 */
+		font-family: var(--font-family-title, Inter);
+		font-size: var(--font-size-lg, 14px);
+		font-style: normal;
+		font-weight: var(--font-weight-light-400, 400);
+		line-height: var(--font-line-hight-lg, 20px); /* 142.857% */
+	}
+}

@@ -1,0 +1,19 @@
+.navbar-container {
+	display: flex;
+	justify-content: space-between;
+	padding: 10px 20px;
+	width: 100%; /* Stretch to full width of the container */
+	box-sizing: border-box; /* Ensure padding doesn't cause overflow */
+	align-items: center;
+
+	.logo-wrapper {
+		svg {
+			width: 150px;
+			height: 38px;
+		}
+	}
+	.actions-container {
+		display: flex;
+		gap: 8px;
+	}
+}

@@ -1,0 +1,17 @@
+.Carousel-login-container {
+	display: flex;
+	flex-direction: column;
+	align-content: center !important;
+	justify-content: center;
+	height: 100%;
+	border-radius: 16px;
+	background-color: #0b1926;
+
+	svg {
+		left: 40%;
+		top: 32px;
+		position: absolute;
+		width: 186px;
+		height: 58px;
+	}
+}

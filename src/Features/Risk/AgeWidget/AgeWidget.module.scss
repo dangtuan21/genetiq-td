@@ -1,0 +1,16 @@
+.AgeWidget-container {
+	display: flex;
+	align-items: center;
+	align-self: stretch;
+	gap: 16px;
+	flex: 1 0 0;
+	box-sizing: border-box;
+	padding: 4px;
+
+	@media (max-width: 1412px) {
+		flex-direction: column;
+		align-items: center;
+		gap: 16px;
+		padding: 12px;
+	}
+}

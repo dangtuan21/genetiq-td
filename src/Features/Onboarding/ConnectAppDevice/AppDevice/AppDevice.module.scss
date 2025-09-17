@@ -1,0 +1,8 @@
+.app-container {
+	display: grid;
+	padding: 0px var(--space-16-px-1-rem, 16px) var(--space-20-px-125-rem, 20px)
+		var(--space-16-px-1-rem, 16px);
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--space-8-px-05-rem, 8px);
+	align-self: stretch;
+}

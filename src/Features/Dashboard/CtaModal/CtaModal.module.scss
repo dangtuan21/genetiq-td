@@ -1,0 +1,159 @@
+@use "@/App/Styles/_mixins" as mixins;
+
+.CtaModal-container {
+	position: fixed;
+	bottom: 24px;
+	left: 24px;
+	width: 256px;
+	padding: 14px 24px;
+	background: #ffffff;
+	border-radius: 16px;
+	border: 1px solid rgba(203, 215, 238, 1);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+	background: linear-gradient(
+			144deg,
+			#d3ddf5 6.09%,
+			rgba(211, 221, 245, 0) 55.38%
+		),
+		#f1f5ff;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	animation: slideIn 0.5s ease-out forwards;
+
+	&-closed {
+		animation: slideOut 0.5s ease-out forwards;
+	}
+
+	@include mixins.media_920 {
+		display: none;
+	}
+}
+
+@keyframes slideOut {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-100%);
+	}
+}
+
+@keyframes slideIn {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+
+.CtaModal-head {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.CtaModal-head-text {
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+	align-items: flex-end;
+}
+
+.CtaModal-number {
+	font-weight: 400;
+	font-size: 48px;
+	line-height: 36px;
+	color: rgba(11, 16, 26, 1);
+}
+
+.CtaModal-title {
+	width: 50%;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 16px;
+	color: rgba(95, 104, 119, 1);
+}
+
+.CtaModal-cross-container {
+	cursor: pointer;
+	transition: all 0.3s ease;
+
+	&:hover {
+		transform: scale(1.05);
+	}
+
+	&-closed {
+		opacity: 0;
+	}
+}
+
+.CtaModal-description {
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 16px;
+	color: rgba(95, 104, 119, 1);
+	margin: 0;
+}
+
+.CtaModal-button {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	width: fit-content;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 24px;
+	background: rgba(59, 141, 245, 0.12);
+	transition: all 0.3s ease;
+
+	&:hover {
+		border: 1px solid rgba(147, 190, 244, 1);
+		box-shadow:
+			0px 2px 12px 1px rgba(20, 28, 44, 0.12),
+			0px 2px 4px 0px rgba(20, 28, 44, 0.12);
+	}
+}
+
+.CtaModal-button-text {
+	color: rgba(0, 41, 173, 1);
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 16px;
+	margin: 0;
+}
+
+.CtaModal-cart-container {
+	width: 20px;
+	height: 20px;
+
+	svg {
+		path {
+			fill: rgba(0, 41, 173, 1);
+		}
+	}
+}
+
+.CtaModal-chevron {
+	position: absolute;
+	top: 6%;
+	right: 0;
+	transform: rotate(270deg);
+	opacity: 0;
+	transition: all 0.3s ease;
+	cursor: pointer;
+
+	&-closed {
+		opacity: 1;
+	}
+}
+
+.CtaModal-shape {
+	position: absolute;
+	top: -5%;
+	left: 0;
+}

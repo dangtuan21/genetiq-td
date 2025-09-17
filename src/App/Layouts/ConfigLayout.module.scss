@@ -1,0 +1,22 @@
+.Config-container {
+	display: flex;
+	flex-direction: column;
+	width: 100vw;
+	height: 100vh;
+	align-items: center;
+}
+
+.logo-wrapper {
+	display: flex;
+	padding: var(--layout-page-margins-top_bottom, 20px);
+	justify-content: space-between;
+	align-items: flex-start;
+	flex-shrink: 0;
+	align-self: stretch;
+	border-bottom: 1px solid var(--Border-weak, #f0f1f0);
+
+	svg {
+		width: 150px;
+		height: 38px;
+	}
+}

@@ -1,0 +1,197 @@
+@use "@/App/Styles/_mixins" as mixins;
+
+.ConcernWidget-wrapper {
+	display: flex;
+	flex-direction: column;
+}
+
+.ConcernWidget-head {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.ConcernWidget-tab {
+	background-color: #ffffff;
+	border-top-left-radius: 8px;
+	padding: 6px 10px 3px 20px;
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 24px;
+	color: #0b101a;
+	position: relative;
+	overflow: hidden;
+	background-color: #e4ebf9;
+}
+
+.ConcernWidget-tab-container {
+	display: flex;
+	flex-direction: row;
+	position: relative;
+}
+
+.ConcernWidget-slope {
+	path {
+		height: 34px;
+	}
+}
+
+.ConcernWidget-more {
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+	align-items: center;
+	cursor: pointer;
+}
+
+.ConcernWidget-more-text {
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 20px;
+	color: #3b8df5;
+	margin: 0 auto;
+}
+
+.ConcernWidget-chevron-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2px 5px;
+}
+
+.ConcernWidget-chevron {
+	transition: transform 0.3s ease;
+
+	path {
+		fill: rgba(59, 141, 245, 1);
+	}
+}
+
+.rotate-chevron {
+	transform: rotate(180deg);
+}
+
+.ConcernWidget-cards-layout {
+	display: grid;
+}
+
+.ConcernWidget-content {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	background-color: #e4ebf9;
+	padding: 16px;
+	border-radius: 0px 8px 8px 8px;
+	overflow: hidden;
+
+	box-sizing: border-box;
+	transition:
+		max-height 1s ease,
+		padding 0.5s ease-in-out;
+}
+
+.ConcernWidget-concern-cards {
+	gap: 12px;
+	grid-template-columns: repeat(3, 1fr);
+
+	&-hidden {
+		transform: translateX(-100%);
+		display: none;
+	}
+
+	&-visible {
+		transform: translateX(0%);
+		display: grid;
+	}
+}
+
+.ConcernWidget-detail-cards {
+	gap: 12px;
+	grid-template-columns: repeat(3, 1fr);
+
+	&-visible {
+		transform: translateX(0%);
+		display: grid;
+	}
+
+	&-hidden {
+		transform: translateX(-102%);
+		display: none;
+	}
+}
+
+@keyframes slideOut {
+	0% {
+		max-height: 0;
+		display: grid;
+		transform: translateX(0%);
+	}
+	100% {
+		max-height: 0;
+		transform: translateX(-102%);
+	}
+}
+
+@keyframes slideOut2 {
+	0% {
+		max-height: calc(fit-content + 10px);
+		transform: translateX(0%);
+	}
+	100% {
+		max-height: calc(fit-content + 10px);
+		display: grid;
+		transform: translateX(-102%);
+	}
+}
+
+@keyframes slideIn {
+	0% {
+		max-height: calc(fit-content);
+		display: grid;
+		transform: translateX(100%);
+	}
+	100% {
+		max-height: calc(fit-content);
+		transform: translateX(0%);
+	}
+}
+
+.ConcernWidget-reasons {
+	overflow: hidden;
+	&-hidden {
+		display: none;
+	}
+}
+
+@keyframes expand {
+	0% {
+		max-height: 0;
+	}
+	100% {
+		max-height: 300px;
+	}
+}
+
+@keyframes collapse {
+	0% {
+		max-height: 300px;
+	}
+	100% {
+		max-height: 0;
+	}
+}
+
+.ConcernWidget-symptoms {
+	overflow: hidden;
+	transition: all 1s ease;
+
+	&-visible {
+		max-height: 400px;
+	}
+
+	&-hidden {
+		visibility: hidden;
+		max-height: 0;
+		transition: all 0.3s ease;
+	}
+}

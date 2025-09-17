@@ -1,0 +1,76 @@
+@use "@/App/Styles/_mixins" as mixins;
+
+.SystemDetailWidget-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	transition: all 5s ease forwards;
+
+	&-hidden {
+		overflow: hidden;
+		max-height: 0px;
+	}
+}
+
+.SystemDetailWidget-head {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.SystemDetailWidget-title {
+	font-weight: 600;
+	font-size: 24px;
+	line-height: 32px;
+	margin: 0;
+	color: #21262e;
+}
+
+.SystemDetailWidget-report {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+}
+
+.SystemDetailWidget-report-text {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	color: rgba(0, 89, 219, 1);
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 20px;
+	margin: 0;
+	border: none;
+	background-color: white;
+
+	svg {
+		path {
+			fill: rgba(0, 89, 219, 1);
+		}
+	}
+	&:hover {
+		border: none;
+		color: rgb(2, 53, 129);
+		svg {
+			path {
+				fill: rgb(2, 53, 129);
+			}
+		}
+	}
+}
+
+.SystemDetailWidget-report-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.SystemDetailWidget-body {
+	margin: 0;
+	color: #5f6877;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 20px;
+}

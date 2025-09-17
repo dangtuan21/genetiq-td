@@ -1,0 +1,46 @@
+.config-control-bar {
+	display: flex;
+	padding: var(--space-4-px-025-rem, 4px);
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 8px;
+	border-radius: var(--Font-size-5XL, 48px);
+	background: var(--Border-weak, #f0f1f0);
+}
+
+.config-control-items {
+	display: flex;
+	padding: 2px;
+	justify-content: center;
+	align-items: flex-start;
+	align-self: stretch;
+	border-radius: var(--font-size-3xl, 24px);
+	background: rgba(255, 255, 255, 0.22);
+}
+
+.config-control-item {
+	display: flex;
+	padding: 4px 8px;
+	justify-content: center;
+	align-items: center;
+	border-radius: var(--font-size-2xl, 20px);
+	background: none;
+
+	color: var(--Neutral-text, #0b101a);
+	text-align: center;
+
+	font-family: var(--font-family-body, Inter);
+	font-size: var(--font-size-lg, 14px);
+	font-style: normal;
+	font-weight: var(--font-weight-medium-500, 500);
+	line-height: var(--font-line-hight-lg, 20px);
+}
+
+.selected-config-control-item {
+	border-radius: 99px;
+	background: var(--Neutral-background-base, #fff);
+
+	box-shadow:
+		0px 2px 2px 0px rgba(20, 28, 44, 0.04),
+		0px 2px 4px 1px rgba(20, 28, 44, 0.04);
+}

@@ -1,0 +1,33 @@
+.filter-bar-container {
+	display: flex;
+	padding: 0px var(--space-16-px-1-rem, 16px);
+	flex-direction: row;
+	align-self: stretch;
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+}
+
+.filter-item {
+	display: flex;
+	cursor: pointer;
+	height: 32px;
+	padding: 8px var(--space-8-px-05-rem, 12px);
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	border-radius: 100px;
+	border: 1px solid var(--p-color-border, rgba(239, 240, 241, 1));
+	background: var(
+		--p-color-bg-fill-magic-secondary-hover,
+		rgba(208, 212, 220, 0.2)
+	);
+}
+
+.selected-filter-item {
+	border: 1px solid var(--p-color-border-magic, rgba(59, 141, 245, 1));
+	background: var(
+		---chip-background-chip-background-selected,
+		rgba(59, 141, 245, 0.24)
+	);
+}

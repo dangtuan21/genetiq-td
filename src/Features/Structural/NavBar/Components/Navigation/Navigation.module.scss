@@ -1,0 +1,52 @@
+.navigation-container {
+	.selected {
+		display: flex;
+		padding: 8px 16px 8px 16px;
+		justify-content: center;
+		align-items: center;
+		height: 32px;
+		gap: 8px;
+		border-color: #e2e6ef;
+		border-radius: 999px;
+		background: #000;
+		color: #fff;
+		line-height: 8px;
+
+		svg {
+			path {
+				fill: #0974fb;
+			}
+		}
+
+		&:hover {
+			border: 1px solid #fff;
+		}
+	}
+	button {
+		display: flex;
+		padding: 8px 16px 8px 16px;
+		justify-content: center;
+		align-items: center;
+		height: auto;
+		gap: 8px;
+		background: #e7e9ec66;
+		border-radius: 99px;
+		color: #0b101a;
+		text-align: center;
+		height: 32px;
+		font-size: 14px;
+		font-style: normal;
+		font-weight: 500;
+		line-height: auto;
+	}
+
+	display: flex;
+	gap: 2px;
+
+	border-radius: 99px;
+	border: 1px solid #fff;
+	align-items: center;
+	justify-content: center;
+	/* Scrim blur */
+	backdrop-filter: blur(1.5px);
+}
